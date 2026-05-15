@@ -82,11 +82,11 @@ UnitreeController::UnitreeController(const UnitreeConfig& cfg)
     // create threads
     command_writer_ptr_ = CreateRecurrentThreadEx("command_writer", UT_CPU_ID_NONE, uint(cfg.control_dt * 1e6), &UnitreeController::LowCommandWriter, this);
 
-    handcmd_left_publisher_.reset(new ChannelPublisher<HandCmd_>("rt/dex3/left/cmd"));
-    handcmd_left_publisher_->InitChannel();
-    handcmd_right_publisher_.reset(new ChannelPublisher<HandCmd_>("rt/dex3/right/cmd"));
-    handcmd_right_publisher_->InitChannel();
-    handcmd_writer_ptr_ = CreateRecurrentThreadEx("handcmd_writer", UT_CPU_ID_NONE, uint(cfg.control_dt * 1e6 * 5), &UnitreeController::HandCommandWriter, this);
+    // handcmd_left_publisher_.reset(new ChannelPublisher<HandCmd_>("rt/dex3/left/cmd"));
+    // handcmd_left_publisher_->InitChannel();
+    // handcmd_right_publisher_.reset(new ChannelPublisher<HandCmd_>("rt/dex3/right/cmd"));
+    // handcmd_right_publisher_->InitChannel();
+    // handcmd_writer_ptr_ = CreateRecurrentThreadEx("handcmd_writer", UT_CPU_ID_NONE, uint(cfg.control_dt * 1e6 * 5), &UnitreeController::HandCommandWriter, this);
 
     init_done_ = true;
 }
@@ -121,7 +121,7 @@ bool UnitreeController::self_check() {
 }
 
 void UnitreeController::LowStateHandler(const void* message) {
-    LowState_ low_state = *(const LowState_*)message;
+    unitree_go::msg::dds_::LowState_ low_state = *(const LowState_*)message;
     // std::cout << "LowState received: " << low_state.tick() << std::endl;
     if (low_state.crc() != Crc32Core((uint32_t*)&low_state, (sizeof(LowState_) >> 2) - 1)) {
         std::cout << "[ERROR] CRC Error" << std::endl;
@@ -160,11 +160,11 @@ void UnitreeController::LowStateHandler(const void* message) {
     robot_state_buffer_.SetData(robot_state_tmp);
 
     // update mode machine
-    if (mode_machine_ != low_state.mode_machine()) {
-        if (mode_machine_ == 0)
-            std::cout << "G1 type: " << unsigned(low_state.mode_machine()) << std::endl;
-        mode_machine_ = low_state.mode_machine();
-    }
+    // if (mode_machine_ != low_state.mode_machine()) {
+    //     if (mode_machine_ == 0)
+    //         std::cout << "G1 type: " << unsigned(low_state.mode_machine()) << std::endl;
+    //     mode_machine_ = low_state.mode_machine();
+    // }
 }
 
 void UnitreeController::SportStateHandler(const void* message) {
@@ -177,9 +177,23 @@ void UnitreeController::SportStateHandler(const void* message) {
 }
 
 void UnitreeController::LowCommandWriter() {
-    LowCmd_ dds_low_command;
-    dds_low_command.mode_pr() = static_cast<uint8_t>(mode_pr_);
-    dds_low_command.mode_machine() = mode_machine_;
+    unitree_go::msg::dds_::LowCmd_ dds_low_command{};
+    // dds_low_command.mode_pr() = static_cast<uint8_t>(mode_pr_);
+    // dds_low_command.mode_machine() = mode_machine_;
+    dds_low_command.head()[0] = 0xFE;
+    dds_low_command.head()[1] = 0xEF;
+    dds_low_command.level_flag() = 0xFF;
+    dds_low_command.gpio() = 0;
+
+    for(int i=0; i<20; i++)
+    {
+        dds_low_command.motor_cmd()[i].mode() = (0x01);   // motor switch to servo (PMSM) mode
+        dds_low_command.motor_cmd()[i].q() = (PosStopF);
+        dds_low_command.motor_cmd()[i].kp() = (0);
+        dds_low_command.motor_cmd()[i].dq() = (VelStopF);
+        dds_low_command.motor_cmd()[i].kd() = (0);
+        dds_low_command.motor_cmd()[i].tau() = (0);
+    }
 
     const std::shared_ptr<const MotorCommand> mc = motor_command_buffer_.GetData();
     if (mc) {

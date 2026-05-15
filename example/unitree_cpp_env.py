@@ -2,10 +2,10 @@ import time
 import numpy as np
 
 from unitree_cpp import UnitreeController, RobotState, SportState  # type: ignore
-from config import RobotConfig
+from config import RobotConfigGo2
 
 class UnitreeCppEnv():
-    def __init__(self, cfg: RobotConfig):
+    def __init__(self, cfg: RobotConfigGo2):
         self.num_dofs = cfg.num_dofs
         self.joint_names = cfg.joint_names
         self.stiffness = cfg.stiffness
@@ -71,7 +71,24 @@ class UnitreeCppEnv():
             )
 
         elif self.msg_type == "go":
-            raise NotImplementedError("msg_type 'go' not implemented in this example.")
+            self._joint_positions = np.asarray(
+                [self.robot_state.motor_state.q[self.dof_idx[i]] for i in range(len(self.dof_idx))]
+            )
+            self._joint_velocities = np.asarray(
+                [self.robot_state.motor_state.dq[self.dof_idx[i]] for i in range(len(self.dof_idx))]
+            )
+            self._joint_efforts = np.asarray(
+                [self.robot_state.motor_state.tau_est[self.dof_idx[i]] for i in range(len(self.dof_idx))]
+            )
+
+            quat = np.asarray(self.robot_state.imu_state.quaternion)
+            ang_vel = np.array(self.robot_state.imu_state.gyroscope, dtype=np.float32)
+
+            self._imu_quaternion = quat
+            self._imu_angular_velocity = ang_vel
+            self._imu_angles = (
+                self.robot_state.imu_state.rpy
+            )
         
         if self.enable_odometry:
             self.sport_state = self.unitree.get_sport_state()
@@ -90,7 +107,7 @@ class UnitreeCppEnv():
 
 
 if __name__ == "__main__":
-    cfg = RobotConfig()
+    cfg = RobotConfigGo2()
     env = UnitreeCppEnv(cfg)
 
     env.update()

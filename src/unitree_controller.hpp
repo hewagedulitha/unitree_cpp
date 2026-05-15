@@ -17,9 +17,9 @@
 #include <unitree/robot/channel/channel_subscriber.hpp>
 
 // IDL
-#include <unitree/idl/hg/IMUState_.hpp>
-#include <unitree/idl/hg/LowCmd_.hpp>
-#include <unitree/idl/hg/LowState_.hpp>
+#include <unitree/idl/go2/IMUState_.hpp>
+#include <unitree/idl/go2/LowCmd_.hpp>
+#include <unitree/idl/go2/LowState_.hpp>
 #include <unitree/robot/b2/motion_switcher/motion_switcher_client.hpp>
 
 #include <unitree/idl/hg/HandState_.hpp>
@@ -32,6 +32,9 @@ using namespace unitree::common;
 using namespace unitree::robot;
 using namespace unitree_hg::msg::dds_;
 using namespace unitree_go::msg::dds_;
+
+constexpr double PosStopF = (2.146E+9f);
+constexpr double VelStopF = (16000.0f);
 
 template <typename T>
 class DataBuffer {
