@@ -7,7 +7,7 @@ class Config(BaseModel):
         return self.model_dump()
 
 class UnitreeConfig(Config):
-    net_if: str = "eth0"
+    net_if: str = "enP8p1s0"
     control_dt: float = 0.02
 
     msg_type: str = "go"    # "hg" or "go"
@@ -18,7 +18,7 @@ class UnitreeConfig(Config):
     lowstate_topic: str = "rt/lowstate"
 
     enable_odometry: bool = True
-    sport_state_topic: str = "rt/odommodestate"
+    sport_state_topic: str = "rt/sportmodestate"
 
 # Config for G1 robot
 class RobotConfig(Config):
@@ -48,7 +48,7 @@ class RobotConfig(Config):
     ]
 
     stiffness: List[float] = [
-        100, 100, 100, 150, 40, 40,
+        60, 100, 100, 150, 40, 40,
         100, 100, 100, 150, 40, 40,
         200, 200, 200,
         40, 40, 40, 40, 20, 20, 20,
@@ -75,9 +75,6 @@ class RobotConfigGo2(Config):
     joint_names: List[str] = [
         "left_hip_pitch_joint", "left_hip_roll_joint", "left_hip_yaw_joint", "left_knee_joint", "left_ankle_pitch_joint", "left_ankle_roll_joint", 
         "right_hip_pitch_joint", "right_hip_roll_joint", "right_hip_yaw_joint", "right_knee_joint", "right_ankle_pitch_joint", "right_ankle_roll_joint", 
-        "waist_yaw_joint", "waist_roll_joint", "waist_pitch_joint",
-        "left_shoulder_pitch_joint", "left_shoulder_roll_joint", "left_shoulder_yaw_joint", "left_elbow_joint", "left_wrist_roll_joint", "left_wrist_pitch_joint", "left_wrist_yaw_joint",
-        "right_shoulder_pitch_joint", "right_shoulder_roll_joint", "right_shoulder_yaw_joint", "right_elbow_joint", "right_wrist_roll_joint", "right_wrist_pitch_joint", "right_wrist_yaw_joint"
     ]
     default_pos: List[float] = [
         0.0, 0.67, -1.3, 
@@ -87,17 +84,11 @@ class RobotConfigGo2(Config):
     ]
 
     stiffness: List[float] = [
-        100, 100, 100, 150, 40, 40,
-        100, 100, 100, 150, 40, 40,
-        200, 200, 200,
-        40, 40, 40, 40, 20, 20, 20,
-        40, 40, 40, 40, 20, 20, 20
+        60, 60, 60, 60, 60, 60, 
+        60, 60, 60, 60, 60, 60, 
     ]
 
     damping: List[float] = [
-        5, 5, 5, 5, 2, 2,
-        5, 5, 5, 5, 2, 2,
-        6, 6, 6,
-        2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 2, 2, 2, 2
+        5, 5, 5, 5, 5, 5,
+        5, 5, 5, 5, 5, 5,
     ]
